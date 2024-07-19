@@ -7,3 +7,7 @@ tmp/
 *.egg
 build
 htmlcov
+
+# Environments
+atomic-venv/
+atomic-venv.bak/
