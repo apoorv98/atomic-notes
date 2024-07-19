@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.services.file_service import create_note, get_note, update_note, delete_note
+from app.services.note_conversion_service import convert_to_atomic_notes
+
+notes = Blueprint('notes', __name__)
+
+@notes.route('', methods=['POST'])
+@jwt_required()
+def create():
+    user_id = get_jwt_identity()
+    data = request.get_json()
+    note = create_note(user_id, data['title'], data['content'])
+    return jsonify({'id': note.id, 'title': note.title, 'content': note.content}), 201
+
+@notes.route('/<int:note_id>', methods=['GET'])
+@jwt_required()
+def read(note_id):
+    note = get_note(note_id)
+    if note:
+        return jsonify({'id': note.id, 'title': note.title, 'content': note.content})
+    return jsonify({'error': 'Note not found'}), 404
+
+@notes.route('/<int:note_id>', methods=['PUT'])
+@jwt_required()
+def update(note_id):
+    data = request.get_json()
+    note = update_note(note_id, data['title'], data['content'])
+    if note:
+        return jsonify({'id': note.id, 'title': note.title, 'content': note.content})
+    return jsonify({'error': 'Note not found'}), 404
+
+@notes.route('/<int:note_id>', methods=['DELETE'])
+@jwt_required()
+def delete(note_id):
+    if delete_note(note_id):
+        return '', 204
+    return jsonify({'error': 'Note not found'}), 404
+
+@notes.route('/<int:note_id>/convert', methods=['POST'])
+@jwt_required()
+def convert(note_id):
+    note = get_note(note_id)
+    if note:
+        atomic_notes = convert_to_atomic_notes(note.content)
+        return jsonify(atomic_notes)
+    return jsonify({'error': 'Note not found'}), 404

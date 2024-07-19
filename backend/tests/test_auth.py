@@ -1,15 +1,22 @@
 #!/usr/bin/env python3
 
 import pytest
-from app import create_app
+from app import create_app, db
 from app.models.user import User
 from app.services.auth_service import register_user
 
 @pytest.fixture
-def client():
+def app():
     app = create_app('testing')
-    with app.test_client() as client:
-        yield client
+    with app.app_context():
+        db.create_all()
+        yield app
+        db.session.remove()
+        db.drop_all()
+
+@pytest.fixture
+def client(app):
+    return app.test_client()
 
 def test_user_registration(client):
     # Test user registration with valid data

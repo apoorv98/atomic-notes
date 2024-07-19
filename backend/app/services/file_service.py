@@ -10,10 +10,10 @@ def create_note(user_id, title, content):
     return note
 
 def get_note(note_id):
-    return Note.query.get(note_id)
+    return db.session.get(Note, note_id)
 
 def update_note(note_id, title, content):
-    note = Note.query.get(note_id)
+    note = db.session.get(Note, note_id)
     if note:
         note.title = title
         note.content = content
@@ -21,7 +21,7 @@ def update_note(note_id, title, content):
     return note
 
 def delete_note(note_id):
-    note = Note.query.get(note_id)
+    note = db.session.get(Note, note_id)
     if note:
         db.session.delete(note)
         db.session.commit()
