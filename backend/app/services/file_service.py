@@ -12,6 +12,16 @@ def create_note(user_id, title, content):
 def get_note(note_id):
     return db.session.get(Note, note_id)
 
+def get_all_notes(user_id):
+    notes = Note.query.filter_by(user_id=user_id).all()
+    return [{
+        'id': note.id,
+        'title': note.title,
+        'content': note.content,
+        'created_at': note.created_at.isoformat(),
+        'updated_at': note.updated_at.isoformat()
+    } for note in notes]
+
 def update_note(note_id, title, content):
     note = db.session.get(Note, note_id)
     if note:
