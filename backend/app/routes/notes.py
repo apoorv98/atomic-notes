@@ -49,8 +49,16 @@ def delete(note_id):
 @notes.route('/<int:note_id>/convert', methods=['POST'])
 @jwt_required()
 def convert(note_id):
+    current_user_id = get_jwt_identity()
     note = get_note(note_id)
-    if note:
-        atomic_notes = convert_to_atomic_notes(note.content)
-        return jsonify(atomic_notes)
-    return jsonify({'error': 'Note not found'}), 404
+
+    if not note or note.use_id != current_user_id:
+        return jsonify({'message': 'Note not found or unauthorized'}), 404
+
+    atomic_notes = convert_to_atomic_notes(note.content)
+
+    if atomic_notes:
+        for atomic_note in atomic_notes:
+            create_note(current_user_id, atomic_note['title'], atomic_note['content'])
+
+    return jsonify({'message': 'Note split to atomic notes successfully', 'atomic_notes': atomic_notes}), 200

@@ -39,3 +39,15 @@ Related to [[Subtopic 1]]
     assert len(atomic_notes) == 3
     assert '[[Subtopic 2]]' in atomic_notes[1]['content']
     assert '[[Subtopic 1]]' in atomic_notes[2]['content']
+
+def test_convert_to_atomic_notes_empty_content():
+    content = ""
+    atomic_notes = convert_to_atomic_notes(content)
+    assert len(atomic_notes) == 0
+
+def test_convert_to_atomic_notes_single_note():
+    content = "# Single Note\n\nThis is a single note without subtopics"
+    atomic_notes = convert_to_atomic_notes(content)
+    assert len(atomic_notes) == 1
+    assert atomic_notes[0]['title'] == 'Single Note'
+    assert 'This is a single note wihtout subtopics' in atomic_notes[0]['content']
