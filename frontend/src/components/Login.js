@@ -1,26 +1,37 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useAuth } from "../context/AuthContext";
+// import axios from "axios";
 
 const Login = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
-            const response = await axios.post("/api/auth/login", {
-                username,
-                password,
-            });
-            localStorage.setItem("token", response.data.token);
+        setError("");
+
+        const success = await login(username, password);
+        if (success) {
             navigate("/notes");
-        } catch (err) {
+        } else {
             setError("Invalid username or password");
         }
     };
+    //     try {
+    //         const response = await axios.post("/api/auth/login", {
+    //             username,
+    //             password,
+    //         });
+    //         localStorage.setItem("token", response.data.token);
+    //         navigate("/notes");
+    //     } catch (err) {
+    //         setError("Invalid username or password");
+    //     }
+    // };
 
     return (
         <div className="max-w-md mx-auto mt-8">

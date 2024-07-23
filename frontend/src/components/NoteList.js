@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 
 const NoteList = () => {
@@ -7,28 +8,36 @@ const NoteList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const { logout } = useAuth();
 
     useEffect(() => {
-        const fetchNotes = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                if (!token) {
-                    navigate("/login");
-                    return;
-                }
-                const response = await axios.get("/api/notes", {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                setNotes(response.data);
-                setLoading(false);
-            } catch (err) {
-                setError("Failed to fetch notes. Please try again.");
-                setLoading(false);
-            }
-        };
-
         fetchNotes();
-    }, [navigate]);
+    }, []);
+
+    const fetchNotes = async () => {
+        try {
+            // const token = localStorage.getItem("token");
+            // if (!token) {
+            //     navigate("/login");
+            //     return;
+            // }
+            const response = await axios.get("/api/notes", {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            setNotes(response.data);
+            setLoading(false);
+        } catch (err) {
+            setError("Failed to fetch notes. Please try again.");
+            setLoading(false);
+        }
+    };
+
+    const handleLogout = () => {
+        logout();
+        navigate("/login");
+    };
 
     const createNewNote = async () => {
         try {
@@ -53,6 +62,12 @@ const NoteList = () => {
         <div className="max-w-4xl mx-auto mt-8">
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Your Notes</h2>
+                <button
+                    onClick={handleLogout}
+                    className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                >
+                    Logout
+                </button>
                 <button
                     onClick={createNewNote}
                     className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"

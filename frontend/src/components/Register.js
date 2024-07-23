@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { useAuth } from "../context/AuthContext";
+// import axios from "axios";
 
 const Register = () => {
     const [username, setUsername] = useState("");
@@ -8,31 +9,40 @@ const Register = () => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const { register } = useAuth();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
 
-        try {
-            const response = await axios.post("/api/auth/register", {
-                username,
-                email,
-                password,
-            });
-
-            if (response.data.access_token) {
-                localStorage.setItem("token", response.data.access_token);
-                navigate("/notes");
-            } else {
-                setError("Registration failed. Please try again.");
-            }
-        } catch (err) {
-            setError(
-                err.response?.data?.message ||
-                    "An error occurred during registration.",
-            );
+        const success = await register(username, email, password);
+        if (success) {
+            navigate("/notes");
+        } else {
+            setError("Registration failed. Please try again.");
         }
     };
+
+    //     try {
+    //         const response = await axios.post("/api/auth/register", {
+    //             username,
+    //             email,
+    //             password,
+    //         });
+
+    //         if (response.data.access_token) {
+    //             localStorage.setItem("token", response.data.access_token);
+    //             navigate("/notes");
+    //         } else {
+    //             setError("Registration failed. Please try again.");
+    //         }
+    //     } catch (err) {
+    //         setError(
+    //             err.response?.data?.message ||
+    //                 "An error occurred during registration.",
+    //         );
+    //     }
+    // };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
